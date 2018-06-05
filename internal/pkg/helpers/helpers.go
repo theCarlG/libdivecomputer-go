@@ -79,9 +79,9 @@ func DescriptorSearch(out **core.Descriptor, name string, family core.Family, mo
 	return core.DcStatusSuccess
 }
 
-func FamilyModel(t core.Family) uint {
+func FamilyModel(typ core.Family) uint {
 	for _, b := range backends {
-		if b.Type == t {
+		if b.Type == typ {
 			return b.Model
 		}
 	}
@@ -99,14 +99,42 @@ func FamilyType(name string) core.Family {
 	return core.DcFamilyNull
 }
 
-func FamilyName(t core.Family) string {
+func FamilyName(typ core.Family) string {
 	for _, b := range backends {
-		if b.Type == t {
+		if b.Type == typ {
 			return b.Name
 		}
 	}
 
 	return ""
+}
+
+func TransportType(name string) core.Transport {
+	for _, t := range transports {
+		if t.Name == name {
+			return t.Type
+		}
+	}
+	return core.DcTransportNone
+}
+
+func TransportName(typ core.Transport) string {
+	for _, t := range transports {
+		if t.Type == typ {
+			return t.Name
+		}
+	}
+	return ""
+}
+
+func TransportDefault(descriptor *core.Descriptor) core.Transport {
+	transp := core.DescriptorGetTransports(descriptor)
+	for _, t := range transports {
+		if transp&uint32(t.Type) != 0 {
+			return t.Type
+		}
+	}
+	return core.DcTransportNone
 }
 
 func EventCallback(device *core.Device, event core.EventType, data unsafe.Pointer, userdata unsafe.Pointer) {

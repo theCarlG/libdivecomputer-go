@@ -1,7 +1,7 @@
 PKG := core
 
 all: clean
-	c-for-go $(PKG).yml
+	c-for-go -debug $(PKG).yml
 	sed -i. 's/diveCallback[A-Z0-9^\)]*/diveCallback/g' core/cgo_helpers.c
 
 clean:

@@ -45,3 +45,17 @@ var backends []backendTable = []backendTable{
 	{"idive", core.DcFamilyDivesystemIdive, 0x03},
 	{"cochran", core.DcFamilyCochranCommander, 0},
 }
+
+type transportTable struct {
+	Name string
+	Type core.Transport
+}
+
+var transports []transportTable = []transportTable{
+	{"serial", core.DcTransportSerial},
+	{"usb", core.DcTransportUsb},
+	{"usbhid", core.DcTransportUsbhid},
+	{"irda", core.DcTransportIrda},
+	{"bluetooth", core.DcTransportBluetooth},
+	{"ble", core.DcTransportBle},
+}

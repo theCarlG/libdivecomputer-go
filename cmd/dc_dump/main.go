@@ -20,6 +20,7 @@ func cancelCb(userdata unsafe.Pointer) int32 {
 func main() {
 	var (
 		descriptor *core.Descriptor
+		iostream   *core.Iostream
 		context    *core.Context
 		device     *core.Device
 	)
@@ -37,12 +38,19 @@ func main() {
 	compFamily := flag.String("family", "", "Device family type")
 	model := flag.Uint("model", 0, "Device model number")
 	filename := flag.String("filename", "", "Dump file")
+	transportType := flag.String("transport", "", "Transport type")
 	devname := flag.String("devname", "", "Tty device name")
 
 	flag.Parse()
 
 	if *filename == "" {
 		fmt.Println("You need to specify filename")
+		os.Exit(1)
+	}
+
+	transport := helpers.TransportType(*transportType)
+	if transport == core.DcTransportNone {
+		fmt.Println("No valid transport type specified")
 		os.Exit(1)
 	}
 
@@ -75,12 +83,18 @@ func main() {
 	core.ContextSetLoglevel(context, core.DcLoglevelDebug)
 	core.ContextSetLogfunc(context, helpers.Logger, nil)
 
+	// Open the I/O stream.
+	fmt.Printf("Opening the I/O stream (%s, %s).\n", helpers.TransportName(transport), *devname)
+	rc = helpers.IOStreamOpen(&iostream, context, descriptor, transport, *devname)
+	helpers.ExitOnError("Error when opening the I/O stream.", rc)
+	defer core.IostreamClose(iostream)
+
 	fmt.Printf("Opening the device (%s %s, %s).\n",
 		core.DescriptorGetVendor(descriptor),
 		core.DescriptorGetProduct(descriptor),
 		*devname)
 
-	rc = core.DeviceOpen(&device, context, descriptor, *devname)
+	rc = core.DeviceOpen(&device, context, descriptor, iostream)
 	defer core.DeviceClose(device)
 
 	helpers.ExitOnError("Error opening the device", rc)
